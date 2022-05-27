@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,19 +65,40 @@ public class DemoBQIT {
 //    }
 
     @Before
-    public void defineMyBigQuery() {
+    public void defineMyBigQuery() throws InterruptedException {
+
         RemoteBigQueryHelper bqHelper = RemoteBigQueryHelper.create();
         bigquery = bqHelper.getOptions().getService();
         projectId = bqHelper.getOptions().getProjectId();
+        System.out.println(projectId);
         dataset = RemoteBigQueryHelper.generateDatasetName();
         String table_0 = "GenderData";
         String table_1 = "GenderAbb";
-//        String tableSpec = String.format("%s.%s", dataset, table_0);
-        tableId_0 = TableId.of(dataset, table_0);
-        tableId_1 = TableId.of(dataset, table_1);
+        String tableSpec = String.format("%s.%s", dataset, "testTable");
+        tableId_0 = TableId.of("testingDS", table_0);
+        tableId_1 = TableId.of("testingDS", table_1);
         System.out.println(tableId_0);
         System.out.println(tableId_1);
-        bigquery.create(DatasetInfo.newBuilder(dataset).build());
+
+
+        String result = String.format("testing of the %s in (%s)","one one one" , new Date().);
+        System.out.println(result);
+
+        bigquery.create(DatasetInfo.newBuilder("testingDS").build());
+        // To use legacy SQL syntax, set useLegacySql to true.
+//        String query ="CREATE TABLE `formal-stratum-344112."+tableSpec +"` ( " +
+//                "    PersonID int," +
+//                "    LastName varchar(255)," +
+//                "    FirstName varchar(255)," +
+//                "    Address varchar(255)," +
+//                "    City varchar(255)" +
+//                ");";
+//        QueryJobConfiguration queryConfig =
+//                QueryJobConfiguration.newBuilder(query).setUseLegacySql(true).build();
+//
+//        // Execute the query.
+//        TableResult result = bigquery.create()
+
 
         InsertAllResponse responset0=createSourcetable(bigquery,tableId_0);
         InsertAllResponse responset1=createSecondTable(bigquery,tableId_1);
@@ -98,8 +120,6 @@ public class DemoBQIT {
 //                                        .setClustering(CLUSTERING)
                                         .build())
                         .build());
-
-        //populate data to my tables
 
         Map<String, Object> row1Data = new HashMap<>();
         row1Data.put("Gender", "M");
@@ -154,11 +174,11 @@ public class DemoBQIT {
     }
     @After
     public void deleteBigQueryDataset() {
-//        RemoteBigQueryHelper.forceDelete(bigquery, dataset);
+//        RemoteBigQueryHelper.forceDelete(bigquery, "testingDS");
     }
     @Test
     public void testBq() throws Exception{
-        ReflectionTestUtils.setField(bqService,"datasetName",dataset);
+        ReflectionTestUtils.setField(bqService,"datasetName","testingDS");
         System.out.println("testing");
         System.out.println(bqController.getValue());
     }
